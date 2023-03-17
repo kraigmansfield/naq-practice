@@ -2,6 +2,7 @@ import React from 'react'
 import { useRef, useState, useEffect } from 'react'
 import userEvent from '@testing-library/user-event'
 import axios from './api/axios'
+import Login from './Login'
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/
 const REGISTER_URL = '/register'
@@ -53,37 +54,48 @@ const Register = () => {
     try {
       const response = await axios.post(
         REGISTER_URL,
-        JSON.stringify({ user, password }),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        },
-      )
+        JSON.stringify({
+            email: this.state.email,
+            password: this.state.password,
+            name:this.state.name
 
-      setUser('');
-      setPassword('');
-      setMatchPassword('');
-
-    } catch (err) {
-        if (!err?.response) {
-            setErrMsg('No Server Response');
-        } else if (err.response?.status === 409) {
-            setErrMsg('Username Taken');
-        } else {
-            setErrMsg('Registration Failed')
+         }).then((response) => {
+            if(response.data.accessToken) {
+                localStorage.setItem("user", JSON.stringify(response.data));
+            } else {
+              console.log("no response");
+            } 
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true,
+            },
+            ),
+            
+            setUser(''),
+            setPassword(''),
+            setMatchPassword(''))
+            
+        } catch (err) {
+            if (!err?.response) {
+                setErrMsg('No Server Response');
+            } else if (err.response?.status === 409) {
+                setErrMsg('Username Taken');
+            } else {
+                setErrMsg('Registration Failed')
+            }
+            errRef.current.focus();
         }
-        errRef.current.focus();
     }
-  }
-  return (
-    <section>
+    return (
+        <section>
       <p
         ref={errRef}
         className={errMsg ? 'errmsg' : 'offscreen'}
         aria-live="assertive"
-      >
+        >
         {errMsg}
       </p>
       <h1>Register</h1>
@@ -99,13 +111,13 @@ const Register = () => {
           aria-describedby="uidnote"
           onFocus={() => setUserFocus(true)}
           onBlur={() => setUserFocus(false)}
-        />
+          />
         <p
           id="uidnote"
           className={
-            userFocus && user && !validName ? 'instructions' : 'offscreen'
-          }
-        >
+              userFocus && user && !validName ? 'instructions' : 'offscreen'
+            }
+            >
           4 to 24 characters.
           <br />
           Must begin with a letter.
@@ -124,7 +136,7 @@ const Register = () => {
           aria-describedby="uidnote"
           onFocus={() => setUserFocus(true)}
           onBlur={() => setUserFocus(false)}
-        />
+          />
         <br></br>
         <br></br>
 
@@ -138,13 +150,13 @@ const Register = () => {
           aria-describedby="pwdnote"
           onFocus={() => setPasswordFocus(true)}
           onBlur={() => setPasswordFocus(false)}
-        />
+          />
         <p
           id="pwdnote"
           className={
-            passwordFocus ? 'instructions' : 'offscreen'
-          }
-        >
+              passwordFocus ? 'instructions' : 'offscreen'
+            }
+            >
           8 to 24 characters.
           <br />
           Must include uppercase and lowercase letters, a number and a special
@@ -163,11 +175,11 @@ const Register = () => {
           aria-describedby="confirmnote"
           onFocus={() => setMatchFocus(true)}
           onBlur={() => setMatchFocus(false)}
-        />
+          />
         <p
           id="confirmnote"
           className={matchFocus && !validMatch ? 'instructions' : 'offscreen'}
-        >
+          >
           Must match the first password input field.
         </p>
         <button>
@@ -178,12 +190,13 @@ const Register = () => {
         Already registered?
         <br />
         <span className="line">
-          {/*put router link here*/}
+          {/* {<Login />} */}
           <a href="#">Sign In</a>
         </span>
       </p>
     </section>
   )
+  
 }
-
-export default Register
+  
+  export default Register;
